@@ -22,3 +22,11 @@ endif
 ifeq ($(subdir),elf)
 sysdep_routines += dl-vdso
 endif
+
+ifneq ($(cet_cflags),)
+# Build relocatable objects from assembly codes with <sys/cet.h> if CET
+# is enabled.
+asm-CPPFLAGS += $(cet_cflags) \
+		-include $(..)sysdeps/unix/sysv/linux/x86/sys/cet.h
++cflags += $(cet_cflags)
+endif
