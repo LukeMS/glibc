@@ -238,6 +238,13 @@ struct cpu_features
 extern const struct cpu_features *__get_cpu_features (void)
      __attribute__ ((const));
 
+/* If <link.h> is included before <dlfcn.h>, _dl_addr won't be
+   declared.  */
+# include <dlfcn.h>
+extern void _dl_check_cet (const ElfW(Phdr) *, size_t,
+			   const ElfW(Addr), bool)
+    attribute_hidden;
+
 # if defined (_LIBC) && !IS_IN (nonlib)
 /* Unused for x86.  */
 #  define INIT_ARCH()

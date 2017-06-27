@@ -76,6 +76,11 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
   extern void _dl_runtime_profile_avx (ElfW(Word)) attribute_hidden;
   extern void _dl_runtime_profile_avx512 (ElfW(Word)) attribute_hidden;
 
+#ifdef ENABLE_CET
+  _dl_check_cet (l->l_phdr, l->l_phnum, l->l_addr,
+		 l->l_type == lt_executable);
+#endif
+
   if (l->l_info[DT_JMPREL] && lazy)
     {
       /* The GOT entries for functions in the PLT have not yet been filled

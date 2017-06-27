@@ -256,6 +256,18 @@ init_cpu_features (struct cpu_features *cpu_features)
 	    cpu_features->feature[index_arch_Use_dl_runtime_resolve_opt]
 	      |= bit_arch_Use_dl_runtime_resolve_opt;
 	}
+
+#ifdef ENABLE_CET
+      /* Mark IBT and SHSTK usable if they are supported by CPU.
+	 _dl_setup_cet will clear them if they are enabled in the
+	 executable.  */
+      if (CPU_FEATURES_CPU_P (cpu_features, IBT))
+	cpu_features->feature[index_arch_IBT_Usable]
+	  |= bit_arch_IBT_Usable;
+      if (CPU_FEATURES_CPU_P (cpu_features, SHSTK))
+	cpu_features->feature[index_arch_SHSTK_Usable]
+	  |= bit_arch_SHSTK_Usable;
+#endif
     }
   /* This spells out "AuthenticAMD".  */
   else if (ebx == 0x68747541 && ecx == 0x444d4163 && edx == 0x69746e65)
