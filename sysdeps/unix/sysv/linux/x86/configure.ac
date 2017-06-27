@@ -21,11 +21,15 @@ if test x"$enable_cet" = xdefault || test x"$enable_cet" = xyes; then
     if test x"$enable_cet" = xdefault; then
       enable_cet=no
     else
-       AC_MSG_ERROR([$CC doesn't support $libc_cv_x86_cet_cflags])
+      AC_MSG_ERROR([$CC doesn't support $libc_cv_x86_cet_cflags])
     fi
     libc_cv_x86_cet_cflags=
   fi
 else
   libc_cv_x86_cet_cflags=
+fi
+if test $enable_cet = yes; then
+  AC_DEFINE(ENABLE_CET, 1,
+	    [Enable Intel Control-flow Enforcement Technology (CET)])
 fi
 LIBC_CONFIG_VAR([cet_cflags], [$libc_cv_x86_cet_cflags])
