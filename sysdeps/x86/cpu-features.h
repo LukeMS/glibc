@@ -238,12 +238,8 @@ struct cpu_features
 extern const struct cpu_features *__get_cpu_features (void)
      __attribute__ ((const));
 
-# ifdef ENABLE_CET
-/* If <link.h> is included before <dlfcn.h>, _dl_addr won't be
-   declared.  */
-#  include <dlfcn.h>
-extern void _dl_check_cet (const ElfW(Phdr) *, size_t,
-			   const ElfW(Addr), bool)
+# ifdef ElfW
+extern void _dl_setup_cet (const ElfW(Phdr) *, size_t, const ElfW(Addr))
     internal_function attribute_hidden;
 # endif
 

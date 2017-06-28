@@ -76,11 +76,6 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
   extern void _dl_runtime_profile_avx (ElfW(Word)) attribute_hidden;
   extern void _dl_runtime_profile_avx512 (ElfW(Word)) attribute_hidden;
 
-#ifdef ENABLE_CET
-  _dl_check_cet (l->l_phdr, l->l_phnum, l->l_addr,
-		 l->l_type == lt_executable);
-#endif
-
   if (l->l_info[DT_JMPREL] && lazy)
     {
       /* The GOT entries for functions in the PLT have not yet been filled
@@ -158,7 +153,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
   return lazy;
 }
 
-#ifdef ENABLE_CET
+#ifdef DL_PROCESS_PT_NOTE
 # define DL_INIT	"_dl_cet_init"
 #else
 # define DL_INIT	"_dl_init"
@@ -261,87 +256,6 @@ dl_platform_init (void)
     GLRO(dl_platform) = NULL;
 #endif
 }
-
-#define ROUND_PROPERTY_NOTE(len) \
-  (((len) + sizeof (ElfW(Addr)) - 1) & -sizeof (ElfW(Addr)))
-
-/* Note sections like .note.ABI-tag and .note.gnu.build-id are aligned
-   to 4 bytes in 64-bit ELF objects.  */
-#define ROUND_NOTE(len) \
-  (((len) + sizeof (ElfW(Word)) - 1) & -sizeof (ElfW(Word)))
-
-static inline void __attribute__ ((unused))
-dl_process_cet_property_note (struct link_map *l,
-			      const ElfW(Nhdr) *note,
-			      ElfW(Addr) size)
-{
-  const ElfW(Addr) start = (ElfW(Addr)) note;
-
-  while ((ElfW(Addr)) (note + 1) - start < size)
-    {
-      /* Find the NT_GNU_PROPERTY_TYPE_0 note.  */
-      if (note->n_namesz == 4
-	  && note->n_type == NT_GNU_PROPERTY_TYPE_0
-	  && memcmp (note + 1, "GNU", 4) == 0)
-	{
-	  unsigned int *ptr
-	    = (unsigned int *) ((char *) &note->n_type
-				+ ROUND_PROPERTY_NOTE (note->n_namesz));
-	  if (ptr[0] == GNU_PROPERTY_X86_FEATURE_1_AND)
-	    {
-	      if (ptr[1] == 4)
-		{
-		  unsigned int pr_data = ptr[2];
-		  if ((pr_data & GNU_PROPERTY_X86_FEATURE_1_IBT))
-		    l->l_cet |= lc_ibt;
-		  if ((pr_data & GNU_PROPERTY_X86_FEATURE_1_SHSTK))
-		    l->l_cet |= lc_shstk;
-		}
-	      break;
-	    }
-	}
-
-      /* Note sections like .note.ABI-tag and .note.gnu.build-id are
-       * aligned to 4 bytes in 64-bit ELF objects.  */
-      note = ((const void *) (note + 1)
-	      + ROUND_NOTE (note->n_namesz)
-	      + ROUND_NOTE (note->n_descsz));
-    }
-}
-
-#ifdef FILEBUF_SIZE
-# define DL_PROCESS_PT_NOTE(l, ph, fd, fbp) \
-  dl_process_pt_note ((l), (ph), (fd), (fbp))
-
-static inline void __attribute__ ((unused))
-dl_process_pt_note (struct link_map *l, const ElfW(Phdr) *ph,
-		    int fd, struct filebuf *fbp)
-{
-  const ElfW(Nhdr) *note;
-  ElfW(Addr) size = ph->p_filesz;
-
-  if (ph->p_offset + size <= (size_t) fbp->len)
-    note = (const void *) (fbp->buf + ph->p_offset);
-  else
-    {
-      note = alloca (size);
-      __lseek (fd, ph->p_offset, SEEK_SET);
-      if (__libc_read (fd, (void *) note, size) != size)
-	return;
-    }
-
-  dl_process_cet_property_note (l, note, size);
-}
-#else
-# define DL_PROCESS_PT_NOTE(l, ph) dl_process_pt_note ((l), (ph))
-
-static inline void __attribute__ ((unused))
-dl_process_pt_note (struct link_map *l, const ElfW(Phdr) *ph)
-{
-  const ElfW(Nhdr) *note = (const void *) (ph->p_vaddr + l->l_addr);
-  dl_process_cet_property_note (l, note, ph->p_memsz);
-}
-#endif
 
 static inline ElfW(Addr)
 elf_machine_fixup_plt (struct link_map *map, lookup_t t,

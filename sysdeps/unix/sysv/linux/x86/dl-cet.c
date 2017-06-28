@@ -15,14 +15,16 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-
 #include <link.h>
-#include <ldsodefs.h>
+
+#ifndef SHARED
+# include <ldsodefs.h>
+# include "dl-cet.h"
 
 void
 internal_function
-_dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
-	       const ElfW(Addr) addr, bool is_executable)
+_dl_setup_cet (const ElfW(Phdr) *phdr, size_t phnum,
+	       const ElfW(Addr) addr)
 {
   if (phdr == NULL)
     return;
@@ -46,10 +48,9 @@ _dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
 		  && note->n_type == NT_GNU_PROPERTY_TYPE_0
 		  && memcmp (note + 1, "GNU", 4) == 0)
 		{
-#define ROUND(len) (((len) + sizeof (ElfW(Addr)) - 1) & -sizeof (ElfW(Addr)))
 		  unsigned int *ptr
 		    = (unsigned int *) ((char *) &note->n_type
-					+ ROUND (note->n_namesz));
+					+ ROUND_PROPERTY_NOTE (note->n_namesz));
 		  if (ptr[0] == GNU_PROPERTY_X86_FEATURE_1_AND)
 		    {
 		      if (ptr[1] == 4)
@@ -62,20 +63,16 @@ _dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
 			}
 		      break;
 		    }
-#undef ROUND
 		}
-/* Note sections like .note.ABI-tag and .note.gnu.build-id are aligned
-   to 4 bytes in 64-bit ELF objects.  */
-#define ROUND(len) (((len) + sizeof note->n_type - 1) & -sizeof note->n_type)
 	      note = ((const void *) (note + 1)
-		      + ROUND (note->n_namesz) + ROUND (note->n_descsz));
-#undef ROUND
+		      + ROUND_NOTE (note->n_namesz)
+		      + ROUND_NOTE (note->n_descsz));
 	    }
 	}
     }
 
-  /* If IBT isn't enabled on executable, disable IBT.  */
-  if (is_executable && !ibt_enabled)
+  /* If IBT isn't enabled, disable IBT.  */
+  if (!ibt_enabled)
     cpu_features->feature[index_arch_IBT_Usable]
       &= ~bit_arch_IBT_Usable;
 
@@ -85,9 +82,11 @@ _dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
       &= ~bit_arch_SHSTK_Usable;
 }
 
+#else
 void
 internal_function
 _dl_cet_init (struct link_map *main_map, int argc, char **argv, char **env)
 {
   _dl_init (main_map, argc, argv, env);
 }
+#endif

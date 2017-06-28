@@ -1,4 +1,5 @@
-/* Operating system support for run-time dynamic linker.  X86 version.
+/* Machine-dependent ELF dynamic relocation inline functions.
+   Linux/x86-64 version.
    Copyright (C) 2017 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -16,6 +17,5 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <config.h>
-#include <sysdeps/x86/cpu-tunables.c>
-#include <sysdeps/unix/sysv/linux/dl-sysdep.c>
+#include <sysdeps/x86_64/dl-machine.h>
+#include "dl-cet.h"

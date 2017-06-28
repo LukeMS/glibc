@@ -20,7 +20,7 @@ libpthread-sysdep_routines += elision-lock elision-unlock elision-timed \
 endif
 
 ifeq ($(subdir),elf)
-sysdep_routines += dl-vdso
+sysdep_routines += dl-vdso dl-cet
 endif
 
 ifneq ($(cet_cflags),)
