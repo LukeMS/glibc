@@ -18,5 +18,5 @@
 
 #include <config.h>
 #include <sysdeps/x86/cpu-tunables.c>
-#include <sysdeps/x86/dl-cet.c>
+#include <sysdeps/unix/sysv/linux/x86/dl-cet.c>
 #include <sysdeps/unix/sysv/linux/dl-sysdep.c>

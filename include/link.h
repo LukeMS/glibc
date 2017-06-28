@@ -174,6 +174,13 @@ struct link_map
 	lt_library,		/* Library needed by main executable.  */
 	lt_loaded		/* Extra run-time loaded shared object.  */
       } l_type:2;
+    enum			/* If this object is enabled with CET.  */
+      {
+	lc_none = 0,		/* Not enabled with CET.  */
+	lc_ibt = 1 << 0,	/* Enabled with IBT.  */
+	lc_shstk = 1 << 1,	/* Enabled with STSHK.  */
+	lc_ibt_and_shstk = lc_ibt | lc_shstk /* Enabled with both.  */
+      } l_cet:2;
     unsigned int l_relocated:1;	/* Nonzero if object's relocations done.  */
     unsigned int l_init_called:1; /* Nonzero if DT_INIT function called.  */
     unsigned int l_global:1;	/* Nonzero if object in _dl_global_scope.  */
