@@ -19,8 +19,8 @@
 #include <link.h>
 #include <ldsodefs.h>
 
-attribute_hidden
 void
+internal_function
 _dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
 	       const ElfW(Addr) addr, bool is_executable)
 {
@@ -83,4 +83,11 @@ _dl_check_cet (const ElfW(Phdr) *phdr, size_t phnum,
   if (!shstk_enabled)
     cpu_features->feature[index_arch_SHSTK_Usable]
       &= ~bit_arch_SHSTK_Usable;
+}
+
+void
+internal_function
+_dl_cet_init (struct link_map *main_map, int argc, char **argv, char **env)
+{
+  _dl_init (main_map, argc, argv, env);
 }

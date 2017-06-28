@@ -244,7 +244,7 @@ extern const struct cpu_features *__get_cpu_features (void)
 #  include <dlfcn.h>
 extern void _dl_check_cet (const ElfW(Phdr) *, size_t,
 			   const ElfW(Addr), bool)
-    attribute_hidden;
+    internal_function attribute_hidden;
 # endif
 
 # if defined (_LIBC) && !IS_IN (nonlib)
