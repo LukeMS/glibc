@@ -16,6 +16,8 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#define DL_INIT	"_dl_cet_init"
+
 #define ROUND_PROPERTY_NOTE(len) \
   (((len) + sizeof (ElfW(Addr)) - 1) & -sizeof (ElfW(Addr)))
 

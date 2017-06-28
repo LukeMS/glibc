@@ -153,9 +153,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
   return lazy;
 }
 
-#ifdef DL_PROCESS_PT_NOTE
-# define DL_INIT	"_dl_cet_init"
-#else
+#ifndef
 # define DL_INIT	"_dl_init"
 #endif
 

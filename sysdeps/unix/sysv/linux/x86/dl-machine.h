@@ -17,5 +17,5 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <sysdeps/x86_64/dl-machine.h>
 #include "dl-cet.h"
+#include <sysdeps/x86_64/dl-machine.h>
